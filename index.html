@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>タイピングコンテスト用</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div id="game">
+    <h1>辰巳中タイピング</h1>
+
+    <div id="word-box">
+      <div id="kanji">スタート</div>
+      <div id="kana">すたーと</div>
+      <div id="romaji-guide"></div>
+    </div>
+
+    <input
+      type="text"
+      id="input"
+      placeholder="STARTを押してタイピング開始"
+      autocomplete="off"
+      disabled
+    >
+
+    <div id="status">
+      <div id="score">スコア: 0</div>
+      <div id="time">残り時間: 60</div>
+    </div>
+
+    <button id="start">START</button>
+
+    <div id="game-over"></div>
+  </div>
+
+  <!-- 効果音 -->
+  <audio id="se-correct" src="sounds/correct.mp3" preload="auto"></audio>
+  <audio id="se-miss" src="sounds/miss.mp3" preload="auto"></audio>
+  <audio id="se-start" src="sounds/start.mp3" preload="auto"></audio>
+  <audio id="se-end" src="sounds/end.mp3" preload="auto"></audio>
+
+  <script src="script.js"></script>
+</body>
+</html>

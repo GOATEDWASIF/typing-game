@@ -1,0 +1,186 @@
+:root {
+  --bg: #0f1220;
+  --panel: #1b1f3b;
+  --accent: #6ae3ff;
+  --accent2: #9b8cff;
+  --text: #ffffff;
+  --subtext: #cfd6ff;
+  --danger: #ff6b6b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden; /* スクロールバーの発生を防止 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+  background: radial-gradient(circle at top, #1b1f3b, #0f1220);
+  color: var(--text);
+}
+
+/* =========================
+   Main Game Panel
+   ========================= */
+#game {
+  width: min(90vw, 125vh);
+  max-height: 96vh;
+  padding: min(2.5vh, 2.2vw) min(4vh, 3.5vw);
+  border-radius: min(3vh, 2.5vw);
+  background: linear-gradient(160deg, #222663, #171a3a);
+  box-shadow:
+    0 24px 50px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* =========================
+   Title
+   ========================= */
+h1 {
+  margin: 0 0 min(1vh, 0.8vw);
+  font-size: min(4.8vh, 4vw);
+  letter-spacing: 0.12em;
+  color: var(--accent);
+}
+
+/* =========================
+   Word Display
+   ========================= */
+#word-box {
+  margin: min(1vh, 0.8vw) 0;
+  padding: min(4.5vh, 3.5vw) min(3vh, 2.5vw);
+  border-radius: min(2.2vh, 1.8vw);
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.45);
+  /* word-break: break-all; を削除 */
+}
+
+/* 漢字 */
+#kanji {
+  font-size: min(7.5vh, 6.2vw);
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: pre-wrap;
+  word-break: keep-all;      /* 単語の途中での改行を防止 */
+  overflow-wrap: break-word; /* 枠からはみ出る場合のみ改行 */
+}
+
+/* ひらがな */
+#kana {
+  margin-top: min(1.2vh, 1vw);
+  font-size: min(4.5vh, 3.7vw);
+  letter-spacing: 0.12em;
+  color: var(--subtext);
+  line-height: 1.25;
+  white-space: pre-wrap;
+  word-break: keep-all;      /* 単語の途中での改行を防止 */
+  overflow-wrap: break-word; /* 枠からはみ出る場合のみ改行 */
+}
+
+/* ガイド */
+#romaji-guide {
+  margin-top: min(1.5vh, 1.2vw);
+  font-size: min(3.2vh, 2.6vw);
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  min-height: 1.3em;
+}
+
+/* =========================
+   Input
+   ========================= */
+#input {
+  width: 100%;
+  margin-top: min(1vh, 0.8vw);
+  padding: min(1.8vh, 1.5vw);
+  font-size: min(3.8vh, 3.1vw);
+  border-radius: min(1.6vh, 1.3vw);
+  border: none;
+  outline: none;
+  background: #0f1220;
+  color: var(--text);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.08);
+}
+
+#input::placeholder {
+  font-size: min(2.6vh, 2.1vw);
+  color: #888fd0;
+}
+
+#input:focus {
+  box-shadow:
+    inset 0 0 0 2px var(--accent),
+    0 0 14px rgba(106, 227, 255, 0.6);
+}
+
+#input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =========================
+   Status
+   ========================= */
+#status {
+  display: flex;
+  justify-content: space-between;
+  margin-top: min(1.5vh, 1.2vw);
+  font-size: min(3.2vh, 2.6vw);
+  font-weight: 600;
+}
+
+#score,
+#time {
+  color: var(--subtext);
+}
+
+/* =========================
+   Button（少し小さく調整）
+   ========================= */
+#start {
+  margin-top: min(1.5vh, 1.2vw);
+  width: 100%;
+  padding: min(1.5vh, 1.2vw) 0; /* 少しスリム化 */
+  font-size: min(2.8vh, 2.3vw); /* 文字サイズをわずかに縮小 */
+  font-weight: 700;
+  border-radius: min(1.5vh, 1.2vw);
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #0f1220;
+  box-shadow: 0 10px 26px rgba(106, 227, 255, 0.4);
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+
+#start:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(106, 227, 255, 0.55);
+}
+
+#start:active {
+  transform: translateY(1px);
+  box-shadow: 0 6px 16px rgba(106, 227, 255, 0.35);
+}
+
+/* =========================
+   Game Over
+   ========================= */
+#game-over {
+  margin-top: min(1.2vh, 1vw);
+  font-size: min(4vh, 3.2vw);
+  font-weight: 800;
+  color: var(--danger);
+}
