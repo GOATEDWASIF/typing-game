@@ -1,46 +1,46 @@
 // ==============================
-// 1. お題リスト（難易度グループ分け）
+// 1. Phrase List (Grouped by Difficulty)
 // ==============================
 const wordGroups = {
   short: [
-    { kana: "もり", kanji: "森" },
-    { kana: "たつみ", kanji: "辰巳" },
-    { kana: "やもり", kanji: "ヤモリ" },
-    { kana: "かなへび", kanji: "カナヘビ" },
-    { kana: "はなび", kanji: "花火" },
-    { kana: "わかしか", kanji: "若鹿" },
-    { kana: "あおくさ", kanji: "青草" },
-    { kana: "やってみる", kanji: "やってみる" },
-    { kana: "こえてゆけ", kanji: "越えてゆけ" },
-    { kana: "じぶんろぐ", kanji: "自分ログ" },
+    { text: "Forest" },
+    { text: "Tatsumi" },
+    { text: "Gecko" },
+    { text: "Lizard" },
+    { text: "Fireworks" },
+    { text: "Young Deer" },
+    { text: "Green Grass" },
+    { text: "Give it a try" },
+    { text: "Go beyond" },
+    { text: "Self Log" },
   ],
   medium: [
-    { kana: "ちしきのやま", kanji: "知識の山" },
-    { kana: "ちしきのみち", kanji: "知識の道" },
-    { kana: "ちしきのにわ", kanji: "知識の庭" },
-    { kana: "おおわしさい", kanji: "大鷲祭" },
-    { kana: "ほんのひとこま", kanji: "ほんの一コマ" },
-    { kana: "ひだまりるーむ", kanji: "ひだまりルーム" },
-    { kana: "すすんでまなぶひと", kanji: "進んで学ぶ人" },
-    { kana: "ごじっしゅうねん", kanji: "五十周年" },
-    { kana: "ふぇすてぃばる", kanji: "フェスティバル" },
-    { kana: "へびすむろうか", kanji: "ヘビ住む廊下" }
+    { text: "Mountain of Knowledge" },
+    { text: "Path of Knowledge" },
+    { text: "Garden of Knowledge" },
+    { text: "Owasashi Festival" },
+    { text: "Just a brief scene" },
+    { text: "Sunny Room" },
+    { text: "Proactive Learner" },
+    { text: "50th Anniversary" },
+    { text: "Festival" },
+    { text: "Snake infested Hallway" }
   ],
   long: [
-    { kana: "こうちょうはちねんめ", kanji: "校長八年目" },
-    { kana: "たつみちゅうがっこう", kanji: "辰巳中学校" },
-    { kana: "れんごうてんらんかい", kanji: "連合展覧会" },
-    { kana: "きーほるだーはいっこまで", kanji: "キーホルダーは一個まで" },
-    { kana: "いけだせんせいはぎゃる", kanji: "池田先生はギャル" },
-    { kana: "あめあがりかわいたみみずにわのはし", kanji: "雨上がり 乾いたミミズ 庭のはし" },
-    { kana: "ふくこうちょうせんせいのこえはめっちゃいい", kanji: "副校長先生の声はめっちゃいい" },
-    { kana: "こんどうせんせいはたまにほうげんがでるじゃけえ", kanji: "近藤先生はたまに方言がでるじゃけえ" },
-    { kana: "おおわだせんせいのはいきんはかいりきー", kanji: "大和田先生の背筋はカイリキー" },
-    { kana: "こうちょうせんせいのせなかはいだい", kanji: "校長先生の背中は偉大" }
+    { text: "Principal's 8th Year" },
+    { text: "Tatsumi Junior High School" },
+    { text: "Joint Exhibition" },
+    { text: "Limit one keychain per person" },
+    { text: "Mr. Ikeda is a gyaru" },
+    { text: "Dried earthworms at the edge of the garden after rain" },
+    { text: "The vice principal has a great voice" },
+    { text: "Mr. Kondo slips into regional dialect sometimes" },
+    { text: "Mr. Owada's back muscles are like Machamp" },
+    { text: "The principal's presence is immense" }
   ]
 };
 
-// 出現順序を管理する配列（短3回 → 普通3回 → 長3回）
+// Queue configuration for game progression (3 short -> 3 medium -> 3 long)
 const wordSequence = [
   "short", "short", "short",
   "medium", "medium", "medium",
@@ -49,19 +49,19 @@ const wordSequence = [
 
 let wordSequenceIndex = 0;
 
-// 未使用のお題を管理するプール
+// Pool tracking for unused phrases to prevent repetition
 let unusedWords = {
   short: [],
   medium: [],
   long: []
 };
 
-// プールをリセット（シャッフル）する関数
+// Refills and shuffles the phrase pool for a category
 function resetPool(category) {
   unusedWords[category] = [...wordGroups[category]];
 }
 
-// 被りなしでお題を取得する関数
+// Retrieves the next phrase sequentially without back-to-back duplicates
 function getNextWord() {
   const currentCategory = wordSequence[wordSequenceIndex];
 
@@ -77,155 +77,53 @@ function getNextWord() {
   return selectedWord;
 }
 
-// ==============================
-// 2. ローマ字変換テーブル
-// ==============================
-const ROMAJI_MAP = {
-  "あ": ["a"], "い": ["i"], "う": ["u", "whu"], "え": ["e"], "お": ["o"],
-  "か": ["ka"], "き": ["ki"], "く": ["ku"], "け": ["ke"], "こ": ["ko"],
-  "さ": ["sa"], "し": ["shi", "si"], "す": ["su"], "せ": ["se"], "そ": ["so"],
-  "た": ["ta"], "ち": ["chi", "ti"], "つ": ["tsu", "tu"], "て": ["te"], "と": ["to"],
-  "な": ["na"], "に": ["ni"], "ぬ": ["nu"], "ね": ["ne"], "の": ["no"],
-  "は": ["ha"], "ひ": ["hi"], "ふ": ["fu", "hu"], "へ": ["he"], "ほ": ["ho"],
-  "ま": ["ma"], "み": ["mi"], "む": ["mu"], "め": ["me"], "も": ["mo"],
-  "や": ["ya"], "ゆ": ["yu"], "よ": ["yo"],
-  "ら": ["ra"], "り": ["ri"], "る": ["ru"], "れ": ["re"], "ろ": ["ro"],
-  "わ": ["wa"], "を": ["wo"], "ん": ["nn", "n", "n'", "xn"],
-  "が": ["ga"], "ぎ": ["gi"], "ぐ": ["gu"], "げ": ["ge"], "ご": ["go"],
-  "ざ": ["za"], "じ": ["ji", "zi"], "ず": ["zu"], "ぜ": ["ze"], "ぞ": ["zo"],
-  "だ": ["da"], "ぢ": ["di"], "づ": ["du"], "で": ["de"], "ど": ["do"],
-  "ば": ["ba"], "び": ["bi"], "ぶ": ["bu"], "べ": ["be"], "ぼ": ["bo"],
-  "ぱ": ["pa"], "ぴ": ["pi"], "ぷ": ["pu"], "ぺ": ["pe"], "ぽ": ["po"],
-  
-  "きゃ": ["kya"], "きゅ": ["kyu"], "きょ": ["kyo"],
-  "しゃ": ["sha", "sya"], "しゅ": ["shu", "syu"], "しょ": ["sho", "syo"], "しぇ": ["she", "sye"],
-  "ちゃ": ["cha", "tya"], "ちゅ": ["chu", "tyu"], "ちょ": ["cho", "tyo"], "ちぇ": ["che", "tye"],
-  "にゃ": ["nya"], "にゅ": ["nyu"], "にょ": ["nyo"],
-  "ひゃ": ["hya"], "ひゅ": ["hyu"], "ひょ": ["hyo"],
-  "みゃ": ["mya"], "みゅ": ["myu"], "みょ": ["myo"],
-  "りゃ": ["rya"], "りゅ": ["ryu"], "りょ": ["ryo"],
-  "ぎゃ": ["gya"], "ぎゅ": ["gyu"], "ぎょ": ["gyo"],
-  "じゃ": ["ja", "zya", "jya"], "じゅ": ["ju", "zyu", "jyu"], "じょ": ["jo", "zyo", "jyo"],
-  "びゃ": ["bya"], "びゅ": ["byu"], "びょ": ["byo"],
-  "ぴゃ": ["pya"], "ぴゅ": ["pyu"], "ぴょ": ["pyo"],
-  "ふぁ": ["fa"], "ふぃ": ["fi"], "ふぇ": ["fe"], "ふぉ": ["fo"],
-  "てぃ": ["thi"], "でぃ": ["dhi"],
-  "ー": ["-"]
-};
-
-const SMALL_MAP = {
-  "ぁ": ["la", "xa"], "ぃ": ["li", "xi"], "ぅ": ["lu", "xu"], "ぇ": ["le", "xe"], "ぉ": ["lo", "xo"],
-  "ゃ": ["lya", "xya"], "ゅ": ["lyu", "xyu"], "ょ": ["lyo", "xyo"],
-  "っ": ["ltu", "xtu", "ltsu"]
-};
-
-// 効果音
+// Audio Elements
 const seCorrect = document.getElementById("se-correct");
 const seMiss = document.getElementById("se-miss");
 const seStart = document.getElementById("se-start");
 const seEnd = document.getElementById("se-end");
 const playSE = se => { se.currentTime = 0; se.play(); };
 
-// DOM
+// DOM References
 const kanjiEl = document.getElementById("kanji");
-const kanaEl = document.getElementById("kana");
-const romajiGuideEl = document.getElementById("romaji-guide");
+const kanaEl = document.getElementById("kana"); // Used for sub-guide in original HTML
+const romajiGuideEl = document.getElementById("romaji-guide"); // Acts as target key helper
 const inputEl = document.getElementById("input");
 const scoreEl = document.getElementById("score");
 const timeEl = document.getElementById("time");
 const startBtn = document.getElementById("start");
 const gameOverEl = document.getElementById("game-over");
 
-// 状態
+// Game States
 let currentWord = null;
-let kanaTokens = [];    
-let tokenIndex = 0;     
-let currentInput = "";  
-let typedRomajiHistory = ""; 
+let targetText = "";
+let currentIndex = 0;     
 let score = 0;
 let time = 60;
 let timer;
 
-// 16文字での強制改行を無効化し、CSS側に改行処理を任せる
-function splitTextEveryN(text, n = 16) {
-  return text;
-}
-
-function parseKana(kanaStr) {
-  const tokens = [];
-  let i = 0;
-  while (i < kanaStr.length) {
-    const two = kanaStr.slice(i, i + 2);
-    if (ROMAJI_MAP[two]) {
-      tokens.push(two);
-      i += 2;
-    } else {
-      tokens.push(kanaStr[i]);
-      i += 1;
-    }
-  }
-  return tokens;
-}
-
-function getCandidates(token, nextToken) {
-  let patterns = [];
-
-  if (ROMAJI_MAP[token]) {
-    patterns = [...ROMAJI_MAP[token]];
-  } else if (SMALL_MAP[token]) {
-    patterns = [...SMALL_MAP[token]];
-  } else {
-    patterns = [token];
-  }
-
-  if (token === "っ" && nextToken) {
-    const nextCandidates = getCandidates(nextToken, null);
-    nextCandidates.forEach(cand => {
-      const firstChar = cand[0];
-      if (!["a", "i", "u", "e", "o", "n", "-"].includes(firstChar)) {
-        if (!patterns.includes(firstChar)) {
-          patterns.unshift(firstChar);
-        }
-      }
-    });
-  }
-
-  return patterns;
-}
-
 function setNewWord() {
   currentWord = getNextWord();
-  kanaTokens = parseKana(currentWord.kana);
-  tokenIndex = 0;
-  currentInput = "";
-  typedRomajiHistory = "";
+  targetText = currentWord.text;
+  currentIndex = 0;
 
-  kanjiEl.innerHTML = splitTextEveryN(currentWord.kanji, 16);
-  kanaEl.innerHTML = splitTextEveryN(currentWord.kana, 16);
+  // Render the target English text on screen
+  kanjiEl.textContent = targetText;
+  kanaEl.textContent = ""; // Kept empty or used for lower-case reference if preferred
   inputEl.value = "";
 
   updateNextKeyGuide();
 }
 
 function updateNextKeyGuide() {
-  if (tokenIndex >= kanaTokens.length) {
+  if (currentIndex >= targetText.length) {
     romajiGuideEl.textContent = "";
     return;
   }
 
-  const curToken = kanaTokens[tokenIndex];
-  const nextToken = kanaTokens[tokenIndex + 1] || null;
-  const candidates = getCandidates(curToken, nextToken);
-
-  const matched = candidates.filter(c => c.startsWith(currentInput));
-
-  if (matched.length > 0) {
-    const recommended = matched[0];
-    const nextChar = recommended[currentInput.length];
-    romajiGuideEl.textContent = nextChar ? "NEXT KEY: " + nextChar.toUpperCase() : "";
-  } else {
-    romajiGuideEl.textContent = "";
-  }
+  const nextChar = targetText[currentIndex];
+  // Displays spaces explicitly as "SPACE" so players understand the break
+  romajiGuideEl.textContent = nextChar === " " ? "NEXT KEY: SPACE" : "NEXT KEY: " + nextChar.toUpperCase();
 }
 
 function startGame() {
@@ -239,8 +137,8 @@ function startGame() {
   resetPool("medium");
   resetPool("long");
 
-  scoreEl.textContent = "スコア: 0";
-  timeEl.textContent = "残り時間: 60";
+  scoreEl.textContent = "Score: 0";
+  timeEl.textContent = "Time Left: 60";
   gameOverEl.textContent = "";
 
   inputEl.disabled = false;
@@ -253,8 +151,7 @@ function startGame() {
   clearInterval(timer);
   timer = setInterval(() => {
     time--;
-    timeEl.textContent = "残り時間: 60"; // 誤記防止用の修正（表示更新用）
-    timeEl.textContent = "残り時間: " + time;
+    timeEl.textContent = "Time Left: " + time;
     if (time <= 0) {
       clearInterval(timer);
       gameOver();
@@ -265,85 +162,56 @@ function startGame() {
 function gameOver() {
   playSE(seEnd);
 
-  // タイムアップ時点で入力完了していた「ひらがな」の文字数をボーナスとして計算
-  let bonus = 0;
-  for (let i = 0; i < tokenIndex; i++) {
-    bonus += kanaTokens[i].length;
-  }
-  
+  // Bonus points for completed characters inside the active incomplete phrase
+  let bonus = currentIndex;
   const finalScore = score + bonus;
 
-  kanjiEl.textContent = "ゲーム終了";
+  kanjiEl.textContent = "Game Over";
   kanaEl.textContent = "";
   romajiGuideEl.textContent = "";
   inputEl.value = "";
-  inputEl.placeholder = "STARTを押してタイピング開始";
+  inputEl.placeholder = "Press START to begin typing";
   inputEl.disabled = true;
 
   if (bonus > 0) {
-    gameOverEl.textContent = `あなたのスコア: ${finalScore} (ボーナス +${bonus}pt)`;
+    gameOverEl.textContent = `Your Score: ${finalScore} (Bonus +${bonus}pt)`;
   } else {
-    gameOverEl.textContent = `あなたのスコア: ${finalScore}`;
+    gameOverEl.textContent = `Your Score: ${finalScore}`;
   }
 }
 
 inputEl.addEventListener("input", () => {
   if (!currentWord || inputEl.disabled) return;
 
-  const typedVal = inputEl.value.toLowerCase();
-  let testInput = typedVal.slice(typedRomajiHistory.length);
+  const currentTypedValue = inputEl.value;
+  const expectedTextSoFar = targetText.slice(0, currentIndex);
 
-  const curToken = kanaTokens[tokenIndex];
-  const nextToken = kanaTokens[tokenIndex + 1] || null;
+  // Check if the character matches perfectly (handles uppercase/lowercase variations)
+  if (currentTypedValue.startsWith(expectedTextSoFar) && currentTypedValue.length === currentIndex + 1) {
+    const newlyTypedChar = currentTypedValue[currentIndex];
+    const expectedChar = targetText[currentIndex];
 
-  // 通常候補の確認（nn, n', xn, n などを判定）
-  const candidates = getCandidates(curToken, nextToken);
-  let matchedCandidates = candidates.filter(c => c.startsWith(testInput));
+    if (newlyTypedChar === expectedChar) {
+      currentIndex++;
 
-  // 「n」1回入力時の子音連携判定：標準マッチがなく、次が母音/y以外の子音なら 「n」 で自動確定
-  if (matchedCandidates.length === 0 && curToken === "ん" && testInput.length > 1 && testInput.startsWith("n")) {
-    const nextChar = testInput[1];
-    if (nextToken) {
-      const nextCandidates = getCandidates(nextToken, kanaTokens[tokenIndex + 2] || null);
-      // 次の打鍵文字が、次のかなの候補の開始文字と一致しているか
-      const isValidNextChar = nextCandidates.some(c => c.startsWith(nextChar));
-      if (isValidNextChar && !["a", "i", "u", "e", "o", "y"].includes(nextChar)) {
-        typedRomajiHistory += "n";
-        testInput = testInput.slice(1);
-        tokenIndex++;
-        currentInput = "";
-
-        // 次トークンに切り替えて再評価
-        const newCurToken = kanaTokens[tokenIndex];
-        const newNextToken = kanaTokens[tokenIndex + 1] || null;
-        const newCandidates = getCandidates(newCurToken, newNextToken);
-        matchedCandidates = newCandidates.filter(c => c.startsWith(testInput));
-      }
-    }
-  }
-
-  if (matchedCandidates.length > 0) {
-    currentInput = testInput;
-    const exactMatch = matchedCandidates.find(c => c === currentInput);
-
-    if (exactMatch) {
-      typedRomajiHistory += exactMatch;
-      currentInput = "";
-      tokenIndex++;
-
-      if (tokenIndex >= kanaTokens.length) {
+      // Word Completed Successfully
+      if (currentIndex >= targetText.length) {
         playSE(seCorrect);
-        score += currentWord.kana.length;
-        scoreEl.textContent = "スコア: " + score;
+        score += targetText.length;
+        scoreEl.textContent = "Score: " + score;
         setNewWord();
         return;
       }
+      updateNextKeyGuide();
+    } else {
+      // Character mismatch
+      playSE(seMiss);
+      inputEl.value = expectedTextSoFar;
     }
-
-    updateNextKeyGuide();
   } else {
+    // Delete or structural mismatch
     playSE(seMiss);
-    inputEl.value = typedRomajiHistory + currentInput;
+    inputEl.value = expectedTextSoFar;
   }
 });
 
