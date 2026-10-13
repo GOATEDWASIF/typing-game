@@ -27,7 +27,7 @@ html, body {
 }
 
 /* =========================
-   Main Game Panel
+   Main Game Panel & Shake
    ========================= */
 #game {
   width: min(90vw, 125vh);
@@ -42,6 +42,25 @@ html, body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+/* HARD SHAKE ANIMATION EFFECT */
+.shake {
+  animation: aggressive-shake 0.15s linear quick;
+}
+
+@keyframes aggressive-shake {
+  0% { transform: translate(0, 0); }
+  10% { transform: translate(-12px, -6px); }
+  20% { transform: translate(10px, 8px); }
+  30% { transform: translate(-8px, 4px); }
+  40% { transform: translate(12px, -4px); }
+  50% { transform: translate(-10px, 6px); }
+  60% { transform: translate(8px, -8px); }
+  70% { transform: translate(-12px, 4px); }
+  80% { transform: translate(10px, -6px); }
+  90% { transform: translate(-6px, 8px); }
+  100% { transform: translate(0, 0); }
 }
 
 /* =========================
@@ -66,17 +85,15 @@ h1 {
   box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.7);
 }
 
-/* Main English Text Container */
 #kanji {
   font-size: min(7.5vh, 6.2vw);
   font-weight: 700;
   line-height: 1.25;
   white-space: pre-wrap;
-  word-break: break-word;     /* Optimized to handle English words cleanly across lines */
+  word-break: break-word;
   overflow-wrap: break-word;
 }
 
-/* Secondary Guide Text Container */
 #kana {
   margin-top: min(1.2vh, 1vw);
   font-size: min(4.5vh, 3.7vw);
@@ -88,7 +105,6 @@ h1 {
   overflow-wrap: break-word;
 }
 
-/* Typing Guide / Help text */
 #romaji-guide {
   margin-top: min(1.5vh, 1.2vw);
   font-size: min(3.2vh, 2.6vw);
@@ -112,8 +128,7 @@ h1 {
   outline: none;
   background: #0f0707;
   color: var(--text);
-  box-shadow:
-    inset 0 0 0 2px rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.06);
 }
 
 #input::placeholder {
