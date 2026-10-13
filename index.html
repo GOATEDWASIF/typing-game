@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Typing Contest</title>
@@ -11,8 +11,11 @@
     <h1>Tatsumi JH Typing</h1>
 
     <div id="word-box">
-      <div id="kanji">スタート</div>
-      <div id="kana">すたーと</div>
+      <!-- Holds the target English text -->
+      <div id="kanji">Press START</div>
+      <!-- Kept for JS compatibility but hidden for clean English UI -->
+      <div id="kana" style="display: none;"></div>
+      <!-- Shows the single key helper cue -->
       <div id="romaji-guide"></div>
     </div>
 
