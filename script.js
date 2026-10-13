@@ -40,7 +40,6 @@ const wordGroups = {
   ]
 };
 
-// Queue configuration for game progression (3 short -> 3 medium -> 3 long)
 const wordSequence = [
   "short", "short", "short",
   "medium", "medium", "medium",
@@ -48,31 +47,20 @@ const wordSequence = [
 ];
 
 let wordSequenceIndex = 0;
+let unusedWords = { short: [], medium: [], long: [] };
 
-// Pool tracking for unused phrases to prevent repetition
-let unusedWords = {
-  short: [],
-  medium: [],
-  long: []
-};
-
-// Refills and shuffles the phrase pool for a category
 function resetPool(category) {
   unusedWords[category] = [...wordGroups[category]];
 }
 
-// Retrieves the next phrase sequentially without back-to-back duplicates
 function getNextWord() {
   const currentCategory = wordSequence[wordSequenceIndex];
-
   if (!unusedWords[currentCategory] || unusedWords[currentCategory].length === 0) {
     resetPool(currentCategory);
   }
-
   const pool = unusedWords[currentCategory];
   const randomIndex = Math.floor(Math.random() * pool.length);
   const selectedWord = pool.splice(randomIndex, 1)[0];
-
   wordSequenceIndex = (wordSequenceIndex + 1) % wordSequence.length;
   return selectedWord;
 }
@@ -86,11 +74,12 @@ const seEnd = document.getElementById("se-end");
 const playSE = se => { 
   if (se) {
     se.currentTime = 0; 
-    se.play().catch(() => { /* Safely ignore browser autoplay audio blocks */ }); 
+    se.play().catch(() => {}); 
   }
 };
 
 // DOM References
+const gamePanel = document.getElementById("game"); // Reference for shaking
 const kanjiEl = document.getElementById("kanji");
 const kanaEl = document.getElementById("kana"); 
 const romajiGuideEl = document.getElementById("romaji-guide"); 
@@ -108,12 +97,19 @@ let score = 0;
 let time = 60;
 let timer;
 
+// Triggers an intense shaking animation on layout errors
+function triggerHardShake() {
+  if (!gamePanel) return;
+  gamePanel.classList.remove("shake");
+  void gamePanel.offsetWidth; // Force CSS reflow to re-trigger the animation instantly
+  gamePanel.classList.add("shake");
+}
+
 function setNewWord() {
   currentWord = getNextWord();
   targetText = currentWord.text;
   currentIndex = 0;
 
-  // Render the target English text on screen
   if (kanjiEl) kanjiEl.textContent = targetText;
   if (kanaEl) kanaEl.textContent = ""; 
   if (inputEl) inputEl.value = "";
@@ -127,14 +123,12 @@ function updateNextKeyGuide() {
     romajiGuideEl.textContent = "";
     return;
   }
-
   const nextChar = targetText[currentIndex];
   romajiGuideEl.textContent = "NEXT KEY: " + nextChar.toUpperCase();
 }
 
 function startGame() {
   playSE(seStart);
-
   score = 0;
   time = 60;
   wordSequenceIndex = 0;
@@ -162,27 +156,45 @@ function startGame() {
     if (timeEl) timeEl.textContent = "Time Left: " + time;
     if (time <= 0) {
       clearInterval(timer);
-      gameOver();
+      startResultsCountdown();
     }
   }, 1000);
 }
 
-function gameOver() {
+// Handles the new post-match timer countdown
+function startResultsCountdown() {
   playSE(seEnd);
 
+  // Instantly lock typing input and hide active phrase boxes
+  if (inputEl) {
+    inputEl.value = "";
+    inputEl.placeholder = "Time Up!";
+    inputEl.disabled = true;
+  }
+  if (kanjiEl) kanjiEl.textContent = "TIME UP!";
+  if (kanaEl) kanaEl.textContent = "";
+  if (romajiGuideEl) romajiGuideEl.textContent = "";
+
+  let countdownValue = 5;
+  if (gameOverEl) gameOverEl.textContent = `Results in ${countdownValue}...`;
+
+  const countdownInterval = setInterval(() => {
+    countdownValue--;
+    if (countdownValue > 0) {
+      if (gameOverEl) gameOverEl.textContent = `Results in ${countdownValue}...`;
+    } else {
+      clearInterval(countdownInterval);
+      showFinalResults();
+    }
+  }, 1000);
+}
+
+function showFinalResults() {
   let bonus = currentIndex;
   const finalScore = score + bonus;
 
   if (kanjiEl) kanjiEl.textContent = "Game Over";
-  if (kanaEl) kanaEl.textContent = "";
-  if (romajiGuideEl) romajiGuideEl.textContent = "";
   
-  if (inputEl) {
-    inputEl.value = "";
-    inputEl.placeholder = "Press START to begin typing";
-    inputEl.disabled = true;
-  }
-
   if (gameOverEl) {
     if (bonus > 0) {
       gameOverEl.textContent = `Your Score: ${finalScore} (Bonus +${bonus}pt)`;
@@ -192,27 +204,22 @@ function gameOver() {
   }
 }
 
-// HIGH-SPEED MECHANICAL KEYBOARD LISTENER
+// MECHANICAL KEYBOARD INTERCEPT ENGINE
 if (inputEl) {
   inputEl.addEventListener("keydown", (event) => {
-    // Ignore function keys like Backspace, Shift, CapsLock, Enter, etc.
     if (event.key.length !== 1 || !currentWord || inputEl.disabled) {
-      // If user physically presses Spacebar, block it so it doesn't mess up the auto-space
       if (event.key === " ") event.preventDefault();
       return;
     }
 
-    // Completely intercept the key press so the browser doesn't do its own slow logic
-    event.preventDefault();
+    event.preventDefault(); // Stop standard slower input buffer rendering
 
     const pressedKey = event.key;
     const expectedChar = targetText[currentIndex];
 
-    // Check key stroke match instantly
     if (pressedKey.toLowerCase() === expectedChar.toLowerCase()) {
       currentIndex++;
 
-      // Current word completed!
       if (currentIndex >= targetText.length) {
         playSE(seCorrect);
         score += targetText.length;
@@ -221,17 +228,17 @@ if (inputEl) {
         return;
       }
 
-      // INSTANT AUTO-SPACE: If the next char is a space, automatically process it with 0ms delay
+      // Auto-space jumper
       if (targetText[currentIndex] === " ") {
         currentIndex++;
       }
 
-      // Visually display what you have typed so far into the box
       inputEl.value = targetText.slice(0, currentIndex);
       updateNextKeyGuide();
     } else {
-      // Missed key sound effect triggers instantly
+      // Mistake: trigger audio AND intense screen vibration
       playSE(seMiss);
+      triggerHardShake();
     }
   });
 }
