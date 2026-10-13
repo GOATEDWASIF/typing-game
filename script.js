@@ -11,7 +11,6 @@ const wordGroups = {
     { text: "Young Deer" },
     { text: "Green Grass" },
     { text: "Give it a try" },
-    { text: "mr.yoshioka is smart" },
     { text: "Go beyond" },
     { text: "Self Log" },
   ],
@@ -130,8 +129,7 @@ function updateNextKeyGuide() {
   }
 
   const nextChar = targetText[currentIndex];
-  // Displays spaces explicitly as "SPACE" so players understand the break
-  romajiGuideEl.textContent = nextChar === " " ? "NEXT KEY: SPACE" : "NEXT KEY: " + nextChar.toUpperCase();
+  romajiGuideEl.textContent = "NEXT KEY: " + nextChar.toUpperCase();
 }
 
 function startGame() {
@@ -150,7 +148,7 @@ function startGame() {
   if (gameOverEl) gameOverEl.textContent = "";
 
   if (inputEl) {
-    inputEl.disabled = false; // Unlocks the box so you can start typing!
+    inputEl.disabled = false;
     inputEl.value = "";
     inputEl.placeholder = "";
     inputEl.focus();
@@ -182,7 +180,7 @@ function gameOver() {
   if (inputEl) {
     inputEl.value = "";
     inputEl.placeholder = "Press START to begin typing";
-    inputEl.disabled = true; // Locks the box again when the game is over
+    inputEl.disabled = true;
   }
 
   if (gameOverEl) {
@@ -194,39 +192,46 @@ function gameOver() {
   }
 }
 
+// HIGH-SPEED MECHANICAL KEYBOARD LISTENER
 if (inputEl) {
-  inputEl.addEventListener("input", () => {
-    if (!currentWord || inputEl.disabled) return;
+  inputEl.addEventListener("keydown", (event) => {
+    // Ignore function keys like Backspace, Shift, CapsLock, Enter, etc.
+    if (event.key.length !== 1 || !currentWord || inputEl.disabled) {
+      // If user physically presses Spacebar, block it so it doesn't mess up the auto-space
+      if (event.key === " ") event.preventDefault();
+      return;
+    }
 
-    const currentTypedValue = inputEl.value;
-    const expectedTextSoFar = targetText.slice(0, currentIndex);
+    // Completely intercept the key press so the browser doesn't do its own slow logic
+    event.preventDefault();
 
-    // Dynamic verification of keyboard stroke tracking
-    if (currentTypedValue.startsWith(expectedTextSoFar) && currentTypedValue.length === currentIndex + 1) {
-      const newlyTypedChar = currentTypedValue[currentIndex];
-      const expectedChar = targetText[currentIndex];
+    const pressedKey = event.key;
+    const expectedChar = targetText[currentIndex];
 
-      if (newlyTypedChar.toLowerCase() === expectedChar.toLowerCase()) {
-        currentIndex++;
+    // Check key stroke match instantly
+    if (pressedKey.toLowerCase() === expectedChar.toLowerCase()) {
+      currentIndex++;
 
-        // Word Completed Successfully
-        if (currentIndex >= targetText.length) {
-          playSE(seCorrect);
-          score += targetText.length;
-          if (scoreEl) scoreEl.textContent = "Score: " + score;
-          setNewWord();
-          return;
-        }
-        updateNextKeyGuide();
-      } else {
-        // Typing error (Wrong key pressed)
-        playSE(seMiss);
-        inputEl.value = expectedTextSoFar;
+      // Current word completed!
+      if (currentIndex >= targetText.length) {
+        playSE(seCorrect);
+        score += targetText.length;
+        if (scoreEl) scoreEl.textContent = "Score: " + score;
+        setNewWord();
+        return;
       }
+
+      // INSTANT AUTO-SPACE: If the next char is a space, automatically process it with 0ms delay
+      if (targetText[currentIndex] === " ") {
+        currentIndex++;
+      }
+
+      // Visually display what you have typed so far into the box
+      inputEl.value = targetText.slice(0, currentIndex);
+      updateNextKeyGuide();
     } else {
-      // Structural correction on delete/backspace actions
+      // Missed key sound effect triggers instantly
       playSE(seMiss);
-      inputEl.value = expectedTextSoFar;
     }
   });
 }
