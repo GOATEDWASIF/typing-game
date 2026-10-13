@@ -11,6 +11,7 @@ const wordGroups = {
     { text: "Young Deer" },
     { text: "Green Grass" },
     { text: "Give it a try" },
+    { text: "mr.yoshioka is smart" },
     { text: "Go beyond" },
     { text: "Self Log" },
   ],
@@ -65,7 +66,7 @@ function resetPool(category) {
 function getNextWord() {
   const currentCategory = wordSequence[wordSequenceIndex];
 
-  if (unusedWords[currentCategory].length === 0) {
+  if (!unusedWords[currentCategory] || unusedWords[currentCategory].length === 0) {
     resetPool(currentCategory);
   }
 
@@ -82,12 +83,18 @@ const seCorrect = document.getElementById("se-correct");
 const seMiss = document.getElementById("se-miss");
 const seStart = document.getElementById("se-start");
 const seEnd = document.getElementById("se-end");
-const playSE = se => { se.currentTime = 0; se.play(); };
+
+const playSE = se => { 
+  if (se) {
+    se.currentTime = 0; 
+    se.play().catch(() => { /* Safely ignore browser autoplay audio blocks */ }); 
+  }
+};
 
 // DOM References
 const kanjiEl = document.getElementById("kanji");
-const kanaEl = document.getElementById("kana"); // Used for sub-guide in original HTML
-const romajiGuideEl = document.getElementById("romaji-guide"); // Acts as target key helper
+const kanaEl = document.getElementById("kana"); 
+const romajiGuideEl = document.getElementById("romaji-guide"); 
 const inputEl = document.getElementById("input");
 const scoreEl = document.getElementById("score");
 const timeEl = document.getElementById("time");
@@ -108,14 +115,15 @@ function setNewWord() {
   currentIndex = 0;
 
   // Render the target English text on screen
-  kanjiEl.textContent = targetText;
-  kanaEl.textContent = ""; // Kept empty or used for lower-case reference if preferred
-  inputEl.value = "";
+  if (kanjiEl) kanjiEl.textContent = targetText;
+  if (kanaEl) kanaEl.textContent = ""; 
+  if (inputEl) inputEl.value = "";
 
   updateNextKeyGuide();
 }
 
 function updateNextKeyGuide() {
+  if (!romajiGuideEl) return;
   if (currentIndex >= targetText.length) {
     romajiGuideEl.textContent = "";
     return;
@@ -137,21 +145,23 @@ function startGame() {
   resetPool("medium");
   resetPool("long");
 
-  scoreEl.textContent = "Score: 0";
-  timeEl.textContent = "Time Left: 60";
-  gameOverEl.textContent = "";
+  if (scoreEl) scoreEl.textContent = "Score: 0";
+  if (timeEl) timeEl.textContent = "Time Left: 60";
+  if (gameOverEl) gameOverEl.textContent = "";
 
-  inputEl.disabled = false;
-  inputEl.value = "";
-  inputEl.placeholder = "";
-  inputEl.focus();
+  if (inputEl) {
+    inputEl.disabled = false; // Unlocks the box so you can start typing!
+    inputEl.value = "";
+    inputEl.placeholder = "";
+    inputEl.focus();
+  }
 
   setNewWord();
 
   clearInterval(timer);
   timer = setInterval(() => {
     time--;
-    timeEl.textContent = "Time Left: " + time;
+    if (timeEl) timeEl.textContent = "Time Left: " + time;
     if (time <= 0) {
       clearInterval(timer);
       gameOver();
@@ -162,57 +172,65 @@ function startGame() {
 function gameOver() {
   playSE(seEnd);
 
-  // Bonus points for completed characters inside the active incomplete phrase
   let bonus = currentIndex;
   const finalScore = score + bonus;
 
-  kanjiEl.textContent = "Game Over";
-  kanaEl.textContent = "";
-  romajiGuideEl.textContent = "";
-  inputEl.value = "";
-  inputEl.placeholder = "Press START to begin typing";
-  inputEl.disabled = true;
+  if (kanjiEl) kanjiEl.textContent = "Game Over";
+  if (kanaEl) kanaEl.textContent = "";
+  if (romajiGuideEl) romajiGuideEl.textContent = "";
+  
+  if (inputEl) {
+    inputEl.value = "";
+    inputEl.placeholder = "Press START to begin typing";
+    inputEl.disabled = true; // Locks the box again when the game is over
+  }
 
-  if (bonus > 0) {
-    gameOverEl.textContent = `Your Score: ${finalScore} (Bonus +${bonus}pt)`;
-  } else {
-    gameOverEl.textContent = `Your Score: ${finalScore}`;
+  if (gameOverEl) {
+    if (bonus > 0) {
+      gameOverEl.textContent = `Your Score: ${finalScore} (Bonus +${bonus}pt)`;
+    } else {
+      gameOverEl.textContent = `Your Score: ${finalScore}`;
+    }
   }
 }
 
-inputEl.addEventListener("input", () => {
-  if (!currentWord || inputEl.disabled) return;
+if (inputEl) {
+  inputEl.addEventListener("input", () => {
+    if (!currentWord || inputEl.disabled) return;
 
-  const currentTypedValue = inputEl.value;
-  const expectedTextSoFar = targetText.slice(0, currentIndex);
+    const currentTypedValue = inputEl.value;
+    const expectedTextSoFar = targetText.slice(0, currentIndex);
 
-  // Check if the character matches perfectly (handles uppercase/lowercase variations)
-  if (currentTypedValue.startsWith(expectedTextSoFar) && currentTypedValue.length === currentIndex + 1) {
-    const newlyTypedChar = currentTypedValue[currentIndex];
-    const expectedChar = targetText[currentIndex];
+    // Dynamic verification of keyboard stroke tracking
+    if (currentTypedValue.startsWith(expectedTextSoFar) && currentTypedValue.length === currentIndex + 1) {
+      const newlyTypedChar = currentTypedValue[currentIndex];
+      const expectedChar = targetText[currentIndex];
 
-    if (newlyTypedChar === expectedChar) {
-      currentIndex++;
+      if (newlyTypedChar.toLowerCase() === expectedChar.toLowerCase()) {
+        currentIndex++;
 
-      // Word Completed Successfully
-      if (currentIndex >= targetText.length) {
-        playSE(seCorrect);
-        score += targetText.length;
-        scoreEl.textContent = "Score: " + score;
-        setNewWord();
-        return;
+        // Word Completed Successfully
+        if (currentIndex >= targetText.length) {
+          playSE(seCorrect);
+          score += targetText.length;
+          if (scoreEl) scoreEl.textContent = "Score: " + score;
+          setNewWord();
+          return;
+        }
+        updateNextKeyGuide();
+      } else {
+        // Typing error (Wrong key pressed)
+        playSE(seMiss);
+        inputEl.value = expectedTextSoFar;
       }
-      updateNextKeyGuide();
     } else {
-      // Character mismatch
+      // Structural correction on delete/backspace actions
       playSE(seMiss);
       inputEl.value = expectedTextSoFar;
     }
-  } else {
-    // Delete or structural mismatch
-    playSE(seMiss);
-    inputEl.value = expectedTextSoFar;
-  }
-});
+  });
+}
 
-startBtn.addEventListener("click", startGame);
+if (startBtn) {
+  startBtn.addEventListener("click", startGame);
+}
