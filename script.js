@@ -246,3 +246,17 @@ if (inputEl) {
 if (startBtn) {
   startBtn.addEventListener("click", startGame);
 }
+// Show the menu layout
+document.getElementById('endGameMenu').style.display = 'flex';
+
+// Change text based on score (e.g., target score of 15 to win)
+if (score >= 15) {
+    document.getElementById('menuTitle').textContent = "🏆 Victory!";
+    document.getElementById('menuTitle').style.color = "#10b981";
+    document.getElementById('menuMessage').textContent = "Amazing typing speed!";
+} else {
+    document.getElementById('menuTitle').textContent = "💥 Game Over";
+    document.getElementById('menuTitle').style.color = "#ef4444";
+    document.getElementById('menuMessage').textContent = "Keep practicing!";
+}
+
